@@ -37,7 +37,7 @@ app.use("/images", express.static("images"));
 
 
 const userRouters = require("./routers/user")
-app.use("/api", [userRouters])
+app.use("/user", [userRouters])
 
 const cartRouter = require("./routers/cart");
 app.use("/cart", [cartRouter]);
