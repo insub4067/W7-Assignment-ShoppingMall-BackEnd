@@ -48,11 +48,21 @@ const images =  upload.fields([{ name: 'thumbnail' }, { name: 'detail_image', ma
 //상품 전체 조회
 router.get("/", async(req, res) => {
 
+    result = await Product.find().sort("productname")
+
+    res.json({result})
+
 })
 
 
 //상품 디테일 조회
-router.get("/detail:id", async(req, res) => {
+router.get("/detail/:id", async(req, res) => {
+
+    const productId = req.params.id
+
+    const result = await Product.findById(productId)
+
+    res.json({ result })
 
 })
 
@@ -90,14 +100,64 @@ router.post('/add', images, async (req, res) => {
     const result = { productname, price, thumbnail, detail_images, createdAt }
     result.productId = product.id;
 
-
-
     res.status(200).send({ result });
 
 });
 
 //상품수정
-router.put('/edit/:id', async (req, res) => {
+router.put('/edit/:id', images, async (req, res) => {
+
+    const productId = req.params.id;
+
+    const image = req.files;
+
+    const { productname, price } = req.body;
+
+    const thumbnail = req.files['thumbnail'][0].path
+
+
+    if(image){
+
+        const result = await Product.findById(productId)
+
+        result.detail_images.forEach( path => console.log(path));
+
+        
+
+        if(Object.keys(req.files)[0] === "thumbnail"){
+
+            fs.unlinkSync(`./${result.thumbnail}`)
+            await Product.findByIdAndUpdate(productId, {
+                productname,
+                price,
+                thumbnail,
+            })
+        }
+
+        if(Object.keys(req.files)[0] === "detail_image"){
+
+            result.detail_images.forEach( path => fs.unlinkSync(path));
+
+            await Product.findByIdAndUpdate(productId, {
+                productname,
+                price,
+
+            })
+
+        }
+
+        // if(req.files.detail_image[0].fieldname === "detail_image"){
+        //     console.log("success")
+        // }
+        
+    }
+
+
+
+    // await Product.findByIdAndUpdate(productId, { productname, price });
+    // result = await Product.findById(productId)
+    // res.status(200).send({ result });
+
 
 })
 

@@ -110,6 +110,25 @@ router.post('/login', async (req, res) => {
 }
 });
 
+//중복확인 
+router.post("/checkDup", async(req, res) => {
+
+  const checkId = req.body.checkId
+  
+  const result = await User.find({ "loginid": checkId })
+
+  if(result == ""){
+    res.status(200).end()
+  }
+
+  if(result !== ""){
+    res.status(400).send({ errorMessage: '이미 가입된 아이디 입니다.' })
+  }
+
+});
+
+
+
 
 //토큰확인
 router.get('/auth', authMiddleware, async (req, res) => {
