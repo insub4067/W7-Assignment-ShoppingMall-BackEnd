@@ -13,7 +13,7 @@ const { required } = require("joi");
 //회원가입
 router.post("/register", async (req, res) => {
 
-  const { username, loginid, password, confirmPassword } = req.body;
+  const { username, loginid, password, confirmPassword, address } = req.body;
 
 
   const schema = Joi.object({
@@ -67,7 +67,7 @@ router.post("/register", async (req, res) => {
 
   const encryptedPassword = crypto.createHash('sha512').update(password).digest('base64'); //암호화 
   
-  const user = new User({ username, loginid, password });
+  const user = new User({ username, loginid, password, address });
   user.password = encryptedPassword
   await user.save(); 
   res.status(201).send({ result: '회원가입이 완료되었습니다' });
@@ -75,42 +75,48 @@ router.post("/register", async (req, res) => {
 
 });
 
+const loginValidater = Joi.object({
+  loginid: Joi.string().required(),
+  password: Joi.string().min(4).required(),
+});
+
 //로그인
-router.post('/login', authMiddleware, async (req, res) => {
+router.post('/login', async (req, res) => {
 
   try {
-    const { loginid, password } = req.body;
-    const user = await User.findOne({
-      loginid,
-      password,
-    });
+        
+    const { loginid, password } = await loginValidater.validateAsync(req.body);
+    const encryptedPassword = crypto.createHash('sha512').update(password).digest('base64'); 
+    const user = await User.findOne({ $and : 
+        [{ loginid: loginid}, {password : encryptedPassword }] })    
+
     if (!user) {
-      return res.status(400).send({
-        errorMessage: "아이디 또는 패스워드가 잘못됐습니다.",
-      });
+        res.status(401).send({ errorMessage: '로그인에 실패했습니다. ' });
+        return;
     }
+    const token = jwt.sign( //토큰 발급
+        { email: user.email, nickname: user.nickname, userId: user.userId },
+        secretKey
+    ); 
 
-    // 토큰 생성
-    const userInfo = { userId: user._id, login: user.loginid, usernmae: user.username };
-
-    const token = jwt.sign(userInfo, secretKey);
-
-    res.send({ token });
-  } catch (err) {
-    console.error(err);
-    res.status(400).send({
-      errorMessage: "아이디 또는 패스워드가 잘못됐습니다.",
+    res.send({
+        token,
     });
-  }
-
+} catch (err) {
+    console.log(err);
+    res.status(400).send({
+        errorMessage: '로그인에 실패하였습니다. ',
+    });
+}
 });
+
 
 //토큰확인
 router.get('/auth', authMiddleware, async (req, res) => {
 
   const user = res.locals.user;
 
-  res.send({ userId: user.userId })
+  res.send({ loginid: user.loginid })
 
 });
 

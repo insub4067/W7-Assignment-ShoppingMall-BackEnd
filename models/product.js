@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema({
-    proudctname: {
+
+    productname: {
         type: String,
         required: true
     },
@@ -12,6 +13,10 @@ const ProductSchema = new mongoose.Schema({
     thumbnail:{
         type: String,
         required: true
+    },
+    detail_images:{
+        type: Array,
+        required: true,
     },
     createdAt: {
         type: String,

@@ -15,8 +15,8 @@ module.exports = async(req, res, next) => {
 
 
     try {
-        const { userId } = jwt.verify(tokenValue, "MintChoco")
-        const foundUser = await User.findOne({userId})
+        const { loginid } = jwt.verify(tokenValue, "MintChoco")
+        const foundUser = await User.findOne({loginid})
         res.locals.user = foundUser;
         next();
         
