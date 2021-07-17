@@ -36,6 +36,7 @@ const upload = multer({
     fileFilter: fileFilter,
 });
 
+
 // const upload = multer({
 //     dest: "./images/thumbNail"
 // })

@@ -1,11 +1,10 @@
-  
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const Joi = require("joi");
 
 const registerValidation = Joi.object({
-  email: Joi.string().email().required(),
-  nickname: Joi.string().alphanum().min(3).trim().required(), //알파벳+숫자, 최소3자이상, 공백제거하고 받음
+  username: Joi.string().email().required(),
+  loginid: Joi.string().alphanum().min(3).trim().required(), //알파벳+숫자, 최소3자이상, 공백제거하고 받음
   password: Joi.string().min(4).trim().required(), //최소 4자이상, 공백제거하고 받음
   confirmPassword: Joi.ref("password"),
 }).with("password", "confirmPassword");
@@ -16,19 +15,18 @@ const registerValidation = Joi.object({
 module.exports = async (req, res, next) => {
 
   try {
-
-    const { username, loginid, password } = await registerValidation.validateAsync(req.body);
+    console.log(req.body)
     
     if (loginid === password) {
       res.status(400).send({
-        errorMessage: "아이디과 비밀번호는 동일하게 설정할 수 없습니다",
+        errorMessage: "아이디와 비밀번호는 동일하게 설정할 수 없습니다",
       });
     }
 
-    //아아디 중복검사
-    const dbLoginid = await User.findOne({ loginid });
+    // 아이디 중복검사
+    const exist_id = await User.findOne({ loginid });
 
-    if (dbLoginid) {
+    if (exist_id) {
       res.status(400).send({
         errorMessage: "아이디가 중복되었습니다",
       });
