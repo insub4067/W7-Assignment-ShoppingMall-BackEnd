@@ -7,9 +7,16 @@ const ReviewSchema = new mongoose.Schema({
         type: String,
         require: true,
     },
+    loginid: {
+        type: String,
+        requie: true,
+    },
     content: {
         type: String,
         require: true,
+    },
+    review_image: {
+        type: String,
     },
     productname: {
         type: String,
@@ -18,6 +25,9 @@ const ReviewSchema = new mongoose.Schema({
     thumbnail:{
         type: String,
         required: true
+    },
+    createdAt: {
+        type: String,
     },
 
 })
