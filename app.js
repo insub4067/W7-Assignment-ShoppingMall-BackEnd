@@ -45,7 +45,8 @@ app.use("/cart", [cartRouter]);
 const productRouter = require("./routers/product");
 app.use("/product", [productRouter]);
 
-
+const reviewRouters = require("./routers/review")
+app.use("/review", [reviewRouters])
 
 app.listen(8080, () => {
     console.log("Server Ready");

@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
         cb(null, "./images");
     },
     filename: function (req, file, cb) {
-        cb(null, new Date().toLocaleString() + file.originalname);
+        cb(null, file.originalname);
     },
 });
 
@@ -38,9 +38,8 @@ const upload = multer({
 });
 
 // Multer 초기세팅
-//   const upload = multer({
-//     dest: "./images/thumbnail"
-// })
+// var upload  = multer({ dest: './images' })
+
 
 //썸네일, 디테일 이미 업로드
 const images =  upload.fields([{ name: 'thumbnail' }, { name: 'detail_image', maxCount: 10 }])
@@ -70,6 +69,7 @@ router.get("/detail/:id", async(req, res) => {
 //상품 추가
 router.post('/add', images, async (req, res) => {
 
+
     const { productname, price } = req.body
 
     const detail_images = [];
@@ -77,7 +77,6 @@ router.post('/add', images, async (req, res) => {
     const thumbnail = req.files['thumbnail'][0].path
 
     req.files['detail_image'].forEach( image => detail_images.push(image.path) )
-
 
     const date = new Date();
     const year = date.getFullYear();
@@ -113,56 +112,85 @@ router.put('/edit/:id', images, async (req, res) => {
 
     const { productname, price } = req.body;
 
-    const thumbnail = req.files['thumbnail'][0].path
-
-
     if(image){
 
-        const result = await Product.findById(productId)
+        const result = await Product.findById(productId) 
 
-        result.detail_images.forEach( path => console.log(path));
 
-        
+        if(image?.thumbnail){
 
-        if(Object.keys(req.files)[0] === "thumbnail"){
+            const thumbnail = image?.thumbnail[0].path
 
             fs.unlinkSync(`./${result.thumbnail}`)
-            await Product.findByIdAndUpdate(productId, {
+
+            Product.findByIdAndUpdate(productId, {
                 productname,
                 price,
                 thumbnail,
-            })
+            }).then();
+
+            res.status(200).send({});
+
         }
 
-        if(Object.keys(req.files)[0] === "detail_image"){
+        if(image?.detail_image){
 
-            result.detail_images.forEach( path => fs.unlinkSync(path));
+            result.detail_images.forEach( path => fs.unlinkSync(`./${path}`));
 
-            await Product.findByIdAndUpdate(productId, {
+            const detail_images = [];
+
+            req.files['detail_image'].forEach( image => detail_images.push(image.path) )
+
+            Product.findByIdAndUpdate(productId, {
                 productname,
                 price,
+                detail_images,
+            }).then();
 
-            })
+            res.status(200).send({});
+
 
         }
 
-        // if(req.files.detail_image[0].fieldname === "detail_image"){
-        //     console.log("success")
-        // }
+        if(image?.detail_image && image?.thumbnail ){
+
+            result.detail_images.forEach( path => fs.unlinkSync(`./${path}`));
+            fs.unlinkSync(`./${result.thumbnail}`);
+
+            const detail_images = [];
+            req.files['detail_image'].forEach( image => detail_images.push(image.path) )
+
+            const thumbnail = image?.thumbnail[0].path
+
+            Product.findByIdAndUpdate(productId, {
+                productname,
+                price,
+                detail_images,
+                thumbnail
+            }).then();
+
+            res.status(200).send({});
+
+        }
+
         
     }
 
-
-
-    // await Product.findByIdAndUpdate(productId, { productname, price });
-    // result = await Product.findById(productId)
-    // res.status(200).send({ result });
+    await Product.findByIdAndUpdate(productId, { productname, price });
+    result = await Product.findById(productId)
+    res.status(200).send({ result });
 
 
 })
 
 //상품삭제
-router.delete("delete/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
+
+    const productId = req.params.id;
+
+    await Product.findByIdAndDelete(productId)
+
+    res.send({})
 
 })
 
