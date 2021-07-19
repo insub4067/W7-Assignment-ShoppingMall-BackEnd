@@ -5,22 +5,26 @@ const ReviewSchema = new mongoose.Schema({
 
     username: {
         type: String,
-        require: true,
+        required: true,
     },
     loginid: {
         type: String,
-        requie: true,
+        required: true,
     },
     content: {
         type: String,
-        require: true,
+        required: true,
+    },
+    star: {
+        type: Nuber,
+        required: true
     },
     review_image: {
         type: String,
     },
     productname: {
         type: String,
-        require: true,
+        required: true,
     },
     thumbnail:{
         type: String,

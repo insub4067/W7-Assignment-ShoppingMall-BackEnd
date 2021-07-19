@@ -27,7 +27,7 @@ router.get("/", async(req, res) => {
 //리뷰추가
 router.post("/add", authMiddleware, upload.single('review_image'), async(req, res) => {
 
-    const { content, productname } = req.body;
+    const { content, productname, star } = req.body;
     const review_image = req.file.path;
     const { username, loginid } = res.locals.user;
     // const { content, productname, username, loginid } = req.body;
@@ -41,7 +41,7 @@ router.post("/add", authMiddleware, upload.single('review_image'), async(req, re
     const month = date.getMonth() + 1;
     const dates = date.getDate();
     const hours = date.getHours();
-    const minutes = date.getMinutes();
+    const minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes(); 
     const seconds = date.getSeconds();
 
     const createdAt = `${year}년 ${month}월 ${dates}일 ${hours}:${minutes}:${seconds}`
@@ -52,6 +52,7 @@ router.post("/add", authMiddleware, upload.single('review_image'), async(req, re
         username,
         loginid,
         content,
+        star,
         review_image,
         createdAt,
     })
