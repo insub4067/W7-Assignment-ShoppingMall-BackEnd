@@ -1,8 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const ejs = require("ejs");
 const app = express();
 const router = express.Router();
+
 
 
 mongoose.connect("mongodb://localhost:27017/epimint", {
@@ -33,9 +35,17 @@ app.use(express.urlencoded({ extended: false }), router);
 app.use(express.json());
 app.use("/images", express.static("images"));
 
+//뷰세팅
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
 
+//ejs렌더
+app.get('/addProduct', (req, res) => {
+    let name = req.query.name;
+    res.render('addProduct', { name });
+})
 
-
+//라우터 연결
 const userRouters = require("./routers/user")
 app.use("/user", [userRouters])
 
