@@ -7,23 +7,64 @@ const authMiddleware = require("../middlewares/auth-Middleware");
 const registerValidator = require("../middlewares/register-Validater");
 const fs = require("fs");
 const { findById } = require("../models/review");
-const review = require("../models/review");
 const app = express();
 const router = express.Router();
 
-const upload  = multer({ dest: './images/review_image' })
+//리뷰 이미지 저장공간 지정
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./images/review_image");
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    },
+});
+
+//리뷰 이미지 파일 형식 체크
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === "image/jpeg" || file.mimetype === "image/jpg" ===
+    file.mimetype === "image/png" || file.mimetype === "image/gif" ) {
+        cb(null, true);
+    } else {
+        cb(new Error("이미지 파일 형식이 맞지 않습니다"), false);
+    }
+};
+
+//리뷰 이미지 저장 
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1024 * 1024 * 5,
+    },
+    fileFilter: fileFilter,
+});
 
 
 //리뷰조회
 router.get("/", async(req, res) => {
 
-    const result = await review.find().sort('-createdAt')
+    const result = await Review.find().sort('-createdAt').limit(10)
+
+    res.send({ result })
+
+})
+
+
+//리뷰더조회
+router.get("/more", async(req, res) => {
+
+    const { beenViewed } = req.body
+
+    const willSkip = (Number(beenViewed))
+
+    const result = await Review.find().sort('-createdAt').skip(willSkip).limit(10)
 
     res.send({ result })
 
 })
 
 //리뷰추가
+//authMiddleware, res.locals.user
 router.post("/add",  upload.single('review_image'), async(req, res) => {
 
     // const { content, productname, star } = req.body;
@@ -63,14 +104,46 @@ router.post("/add",  upload.single('review_image'), async(req, res) => {
 
 })
 
+//별점평균값 가져오기
+router.get("/starAverage", async(req,res) => {
+
+    const result = await Review.find()
+
+    const totalReview = result.length
+
+    var sum = 0
+
+    result.forEach( review => sum += review.star) 
+
+    const Average = sum / totalReview
+
+    res.send({Average})
+
+})
+
 //리뷰수정
-router.put("/edit/:id", authMiddleware, async(req, res) => {
+//authMiddleware, res.locals.user
+router.put("/edit/:id", upload.single('review_image'), async(req, res) => {
 
-    const rewviewId = req.params.id
+    const reviewId = req.params.id
 
-    const { content } = req.body;
+    const { content, star } = req.body;
 
-    await Review.findByIdAndUpdate(rewviewId, {content})
+    const result = await Review.findById(reviewId)
+
+    const image = req.file
+
+    if(image){
+
+        const review_image = req.file.path
+
+        fs.unlinkSync(`./${result.review_image}`)
+
+        Review.findByIdAndUpdate(reviewId, {review_image}).then()
+
+    }
+
+    await Review.findByIdAndUpdate(reviewId, {content, star})
 
     res.send({})
 
