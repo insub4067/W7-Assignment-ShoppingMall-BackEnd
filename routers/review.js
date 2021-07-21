@@ -17,23 +17,23 @@ const upload  = multer({ dest: './images/review_image' })
 //리뷰조회
 router.get("/", async(req, res) => {
 
-    const { productname } = req.body;
-    const result = await review.find({ productname: productname }).sort('-createdAt')
+    const result = await review.find().sort('-createdAt')
 
     res.send({ result })
 
 })
 
 //리뷰추가
-router.post("/add", authMiddleware, upload.single('review_image'), async(req, res) => {
+router.post("/add",  upload.single('review_image'), async(req, res) => {
 
-    const { content, productname, star } = req.body;
+    // const { content, productname, star } = req.body;
     const review_image = req.file.path;
-    const { username, loginid } = res.locals.user;
-    // const { content, productname, username, loginid } = req.body;
+    // const { username, loginid } = res.locals.user;
+
+    const { content, productname, star, username, loginid } = req.body;
 
 
-    const result = await Product.find({ productname: productname })
+    const result = await Product.find({ 'productname': productname })
     const thumbnail = result[0].thumbnail
 
     const date = new Date();
@@ -59,7 +59,7 @@ router.post("/add", authMiddleware, upload.single('review_image'), async(req, re
 
     await review.save();
 
-    res.send({})
+    res.send({message: 'Success'})
 
 })
 
