@@ -65,14 +65,11 @@ router.get("/more", async(req, res) => {
 
 
 //리뷰추가
-//authMiddleware
-router.post("/add", upload.single('review_image'), async(req, res) => {
+router.post("/add", authMiddleware, upload.single('review_image'), async(req, res) => {
 
-    // const { content, productname, star } = req.body;
-    // const review_image = req.file.path;
-    // const { username, loginid } = res.locals.user;
-    const { content, productname, star, username, loginid } = req.body;
-
+    const { content, productname, star } = req.body;
+    const { username, loginid } = res.locals.user;
+    // const { content, productname, star, username, loginid } = req.body;
 
     const image = req.file;
 
