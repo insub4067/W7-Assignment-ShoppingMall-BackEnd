@@ -158,8 +158,7 @@ router.get("/total", async(req,res) => {
 })
 
 //리뷰수정
-//authMiddleware, res.locals.user
-router.put("/edit/:id", upload.single('review_image'), async(req, res) => {
+router.put("/edit/:id", authMiddleware, upload.single('review_image'), async(req, res) => {
 
     const reviewId = req.params.id
 
@@ -186,8 +185,7 @@ router.put("/edit/:id", upload.single('review_image'), async(req, res) => {
 })
 
 //리뷰삭제
-//authMiddleware
-router.delete("/delete/:id", async(req, res) => {
+router.delete("/delete/:id", authMiddleware, async(req, res) => {
 
     const rewviewId = req.params.id
 
