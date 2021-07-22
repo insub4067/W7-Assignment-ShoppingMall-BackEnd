@@ -50,7 +50,7 @@ router.get("/", async(req, res) => {
 })
 
 
-//리뷰더조회
+//리뷰 더조회
 router.get("/more", async(req, res) => {
 
     const { beenViewed } = req.body
@@ -63,16 +63,18 @@ router.get("/more", async(req, res) => {
 
 })
 
+
 //리뷰추가
-//authMiddleware, res.locals.user
-router.post("/add",  upload.single('review_image'), async(req, res) => {
+//authMiddleware
+router.post("/add", upload.single('review_image'), async(req, res) => {
 
     // const { content, productname, star } = req.body;
-    const review_image = req.file.path;
+    // const review_image = req.file.path;
     // const { username, loginid } = res.locals.user;
-
     const { content, productname, star, username, loginid } = req.body;
 
+
+    const image = req.file;
 
     const result = await Product.find({ 'productname': productname })
     const thumbnail = result[0].thumbnail
@@ -87,6 +89,29 @@ router.post("/add",  upload.single('review_image'), async(req, res) => {
 
     const createdAt = `${year}년 ${month}월 ${dates}일 ${hours}:${minutes}:${seconds}`
 
+    if(image){
+
+        const review_image = req.file.path;
+
+
+        const review = new Review({
+            thumbnail,
+            productname,
+            username,
+            loginid,
+            content,
+            star,
+            review_image,
+            createdAt,
+        })
+    
+        await review.save();
+    
+        res.send({message: 'Success'})
+    
+
+    }
+
     const review = new Review({
         thumbnail,
         productname,
@@ -94,7 +119,6 @@ router.post("/add",  upload.single('review_image'), async(req, res) => {
         loginid,
         content,
         star,
-        review_image,
         createdAt,
     })
 
@@ -117,7 +141,22 @@ router.get("/starAverage", async(req,res) => {
 
     const Average = sum / totalReview
 
-    res.send({Average})
+    let average = Average.toString().slice(0,3)
+
+    average *= 1
+
+    res.send({ average })
+
+})
+
+//리뷰 게시글 총수 조회
+router.get("/total", async(req,res) => {
+
+    const result = await Review.find()
+
+    const total = result.length
+
+    res.send({ total })
 
 })
 
@@ -150,7 +189,8 @@ router.put("/edit/:id", upload.single('review_image'), async(req, res) => {
 })
 
 //리뷰삭제
-router.delete("/delete/:id", authMiddleware, async(req, res) => {
+//authMiddleware
+router.delete("/delete/:id", async(req, res) => {
 
     const rewviewId = req.params.id
 

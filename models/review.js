@@ -17,7 +17,7 @@ const ReviewSchema = new mongoose.Schema({
     },
     star: {
         type: Number,
-        required: true
+        required: true,
     },
     review_image: {
         type: String,

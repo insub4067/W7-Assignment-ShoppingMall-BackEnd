@@ -95,7 +95,7 @@ router.post('/login', async (req, res) => {
         return;
     }
     const token = jwt.sign( //토큰 발급
-        { email: user.email, nickname: user.nickname, userId: user.userId },
+        { loginid: user.loginid, username: user.username },
         secretKey
     ); 
 
